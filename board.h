@@ -9,12 +9,18 @@
 
 class Board {
 public:
-    Board(int width, int height) : width_(width), height_(height) {
+    Board(int width, int height) : width_(width), height_(height), goal_pix_(-1), xgoal_(-1), ygoal_(-1) {
         for (int x = 0; x < width_; ++x) {
             for (int y = 0; y < height_; ++y) {
                 grid_[x][y] = '\0';
             }
         }
+    }
+    bool set_goal(int pix, int xgoal, int ygoal) {
+        goal_pix_ = pix;
+        xgoal_ = xgoal;
+        ygoal_ = ygoal;
+        return true;
     }
     bool add_piece(Piece& piece) {
         pieces_.insert(pieces_.end(), piece);
@@ -61,6 +67,18 @@ public:
         }
         return true;
     }
+    bool is_won() const {
+        if (goal_pix_ < 0) return false;
+        Piece const& piece = pieces_[goal_pix_];
+        if (piece.orient == Piece::HORZ) {
+            for (int x = piece.x + piece.len; x < width_; ++x)
+                if (grid_[x][piece.y] != '\0') return false;
+        } else {
+            for (int y = piece.y + piece.len; y < width_; ++y)
+                if (grid_[piece.x][y] != '\0') return false;
+        }
+        return true;
+    }
     void dump() const {
         printf(" "); for (int x = 0; x < width_; ++x) { printf("-"); } printf("\n");
         for (int y = 0; y < height_; ++y) {
@@ -77,6 +95,9 @@ private:
     int height_;
     char grid_[MAX_WIDTH][MAX_HEIGHT];
     std::deque<Piece> pieces_;
+    int goal_pix_;
+    int xgoal_;
+    int ygoal_;
 };
 
 #endif // _BOARD_H_

@@ -23,11 +23,21 @@ static bool add_piece(char* cmd, Piece::Orient orient, Board& board) {
     return true;
 }
 
+static bool set_goal(char* cmd, Board& board) {
+    int pix = strtoul(cmd, &cmd, 0);
+    if (*cmd++ != ',') return false;
+    int x = strtoul(cmd, &cmd, 0);
+    if (*cmd++ != ',') return false;
+    int y = strtoul(cmd, &cmd, 0);
+    return board.set_goal(pix, x, y);
+}
+
 static void cmd(char* cmd, Board& board) {
     switch (cmd[0]) {
-    case 'p': board.dump(); break;
+    case 'p': board.dump(); if (board.is_won()) printf("WON!\n"); break;
     case 'v': add_piece(&cmd[1], Piece::VERT, board); break;
     case 'h': add_piece(&cmd[1], Piece::HORZ, board); break;
+    case 'g': set_goal(&cmd[1], board); break;
     case 'm': {
         int pix = strtoul(cmd+1, &cmd, 0);
         if (!board.move(pix, cmd[0] == 'f')) printf("cannot move %d\n", pix);
