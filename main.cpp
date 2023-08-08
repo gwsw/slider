@@ -7,6 +7,8 @@
 
 char Piece::next_name_ = 'A';
 bool verbose = false;
+bool dump_solns = false;
+bool draw_solns = false;
 
 static int usage() {
     printf("usage: slider [-w#][-h#] ...\n");
@@ -37,17 +39,30 @@ static bool move_piece(char* cmd, Board& board) {
     return board.move(pix, cmd[0] == 'f');
 }
 
-static bool solve(char* cmd, Board& board) {
-    int num_moves = strtoul(cmd, &cmd, 0);
+static bool solve_moves(Board& board, int num_moves) {
     Solver solver(board);
-    if (!solver.solve_moves(num_moves))
-        printf("no solution\n");
-    return true;
+    bool solved = solver.solve_moves(num_moves);
+    if (!solved) printf("no %d move solution\n", num_moves);
+    return solved;
+}
+
+static bool solve(char* cmd, Board& board) {
+    if (*cmd != '\0') {
+        int num_moves = strtoul(cmd, &cmd, 0);
+        return solve_moves(board, num_moves);
+    } else {
+        for (int num_moves = 1;; ++num_moves) {
+            if (solve_moves(board, num_moves))
+                return true;
+        }
+    }
 }
 
 static bool cmd(char* cmd, Board& board) {
+    if (board.is_won()) printf("*** WON!\n");
     switch (cmd[0]) {
-    case 'p': board.dump(); if (board.is_won()) printf("WON!\n"); return true;
+    case 'd': board.dump(); return true;
+    case 'D': board.draw(); return true;
     case 'v': return add_piece(&cmd[1], Piece::VERT, board); 
     case 'h': return add_piece(&cmd[1], Piece::HORZ, board);
     case 'g': return set_goal(&cmd[1], board);
@@ -58,20 +73,39 @@ static bool cmd(char* cmd, Board& board) {
 }
 
 int main(int argc, char** argv) {
-    int width = 5;
-    int height = 5;
+    int width = 0;
+    int height = 0;
+    char* board_file = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "h:w:v")) != -1) {
+    while ((opt = getopt(argc, argv, "dDf:h:w:v")) != -1) {
         switch (opt) {
+        case 'd': dump_solns = true; break;
+        case 'D': draw_solns = true; break;
+        case 'f': board_file = optarg; break;
         case 'h': height = strtol(optarg, NULL, 10); break;
         case 'w': width = strtol(optarg, NULL, 10); break;
         case 'v': verbose = true; break;
         default: return usage();
         }
     }
-    Board board(width, height);
+    Board* board = NULL;
+    if (board_file) {
+        FILE* fd = fopen(board_file, "r");
+        if (fd == NULL) {
+            printf("cannot open %s\n", board_file);
+            return 1;
+        }
+        board = Board::read_file(fd);
+        fclose(fd);
+    } else if (width > 0 && height > 0) {
+        board = new Board(width, height);
+    }
+    if (board == NULL) {
+        printf("ERROR: no board\n");
+        return 1;
+    }
     for (int arg = optind; arg < argc; ++arg) {
-        if (!cmd(argv[arg], board)) printf("cmd failed\n");
+        if (!cmd(argv[arg], *board)) printf("cmd failed\n");
     }
     return 0;
 }

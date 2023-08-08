@@ -6,6 +6,8 @@
 #include "board.h"
 
 extern bool verbose;
+extern bool dump_solns;
+extern bool draw_solns;
 
 class Solver {
 private:
@@ -47,12 +49,12 @@ public:
                 continue;
             if (verbose) {
                 printf("check: ");
-                print_soln(soln);
+                print_soln(soln, false, false);
             }
             if (is_winner(soln)) {
                 solved = true;
                 printf("solution: ");
-                print_soln(soln);
+                print_soln(soln, dump_solns, draw_solns);
                 // break;
             }
         }
@@ -75,10 +77,21 @@ return false;
             board_.move(imv->pix, imv->fwd);
         return board_.is_won();
     }
-    void print_soln(Soln& soln) {
+    void print_soln(Soln& soln, bool dump, bool draw) {
         for (auto it = soln.begin(); it != soln.end(); ++it)
             printf("%c%s ", board_.piece_name(it->pix), it->fwd ? "" : "'");
         printf("\n");
+        if (dump || draw) {
+            board_.reset();
+            for (auto imv = soln.begin(); imv != soln.end(); ++imv) {
+                if (draw) board_.draw();
+                if (dump) board_.dump();
+                printf("\n");
+                board_.move(imv->pix, imv->fwd);
+            }
+            if (draw) board_.draw();
+            if (dump) board_.dump();
+        }
     }
 
 private:
