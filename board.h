@@ -10,6 +10,10 @@
 class Board {
 public:
     Board(int width, int height) : width_(width), height_(height), goal_pix_(-1), xgoal_(-1), ygoal_(-1) {
+        clear();
+    }
+    void clear() {
+        //memset
         for (int x = 0; x < width_; ++x) {
             for (int y = 0; y < height_; ++y) {
                 grid_[x][y] = '\0';
@@ -22,15 +26,38 @@ public:
         ygoal_ = ygoal;
         return true;
     }
-    bool add_piece(Piece& piece) {
-        pieces_.insert(pieces_.end(), piece);
-        if (piece.orient == Piece::HORZ) {
-            for (int x = 0; x < piece.len; ++x)
-                grid_[piece.x+x][piece.y] = piece.name;
-        } else {
-            for (int y = 0; y < piece.len; ++y)
-                grid_[piece.x][piece.y+y] = piece.name;
+    void reset() {
+        clear();
+        for (auto ipiece = pieces_.begin(); ipiece != pieces_.end(); ++ipiece) {
+            ipiece->reset();
+            (void) set_piece(*ipiece);
         }
+    }
+    bool set_piece(Piece& piece) {
+        if (piece.orient == Piece::HORZ) {
+            for (int x = 0; x < piece.len; ++x) {
+                if (piece.x+x >= width_ || grid_[piece.x+x][piece.y]) {
+                    for (int rx = 0; rx < x; ++rx)
+                        grid_[piece.x+rx][piece.y] = '\0';
+                    return false;
+                }
+                grid_[piece.x+x][piece.y] = piece.name;
+            }
+        } else {
+            for (int y = 0; y < piece.len; ++y) {
+                if (piece.y+y >= height_ || grid_[piece.x][piece.y+y]) {
+                    for (int ry = 0; ry < y; ++ry)
+                        grid_[piece.x][piece.y+ry] = '\0';
+                    return false;
+                }
+                grid_[piece.x][piece.y+y] = piece.name;
+            }
+        }
+        return true;
+    }
+    bool add_piece(Piece& piece) {
+        if (!set_piece(piece)) return false;
+        pieces_.insert(pieces_.end(), piece);
         return true;
     }
     bool move(int pix, bool fwd) {
@@ -78,6 +105,12 @@ public:
                 if (grid_[piece.x][y] != '\0') return false;
         }
         return true;
+    }
+    char piece_name(int pix) const {
+        return pieces_[pix].name;
+    }
+    int num_pieces() const {
+        return (int) pieces_.size();
     }
     void dump() const {
         printf(" "); for (int x = 0; x < width_; ++x) { printf("-"); } printf("\n");
