@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+
 template< typename Value > class TwoDim {
 public:
     TwoDim() : width_(0), height_(0), buf_(NULL) {}
@@ -10,16 +11,11 @@ public:
         new_buf();
         clear(value);
     }
-    void clear(Value value) {
+    template<class V> void clear(V value) {
         int tlen = len();
         for (int i = 0; i < tlen; ++i)
             buf_[i] = value;
     }
-#if 0
-    void clear(char value) {
-        memset(buf_, value, len());
-    }
-#endif
     void resize(int width, int height) {
         if (width == width_ && height == height_) return;
         if (buf_) delete[] buf_;
@@ -45,4 +41,7 @@ private:
     Value* buf_;
 };
 
+template<> template<> void TwoDim<char>::clear(char value) {
+    memset(buf_, value, len());
+}
 #endif // _2D_H_
