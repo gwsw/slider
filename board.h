@@ -16,7 +16,7 @@ public:
         if (width >= 0 && height >= 0) resize(width, height);
     }
     void resize(int width, int height) {
-        grid_.resize(width, height);
+        grid_.resize(width, height, '\0');
     }
     void clear() {
         grid_.clear('\0');
@@ -69,7 +69,7 @@ public:
                 }
                 if (board == NULL && width > 0 && height > 0) {
                     board = new Board(width, height);
-                    pic.resize(width, height);
+                    pic.resize(width, height, '\0');
                 }
                 --y;
                 continue;

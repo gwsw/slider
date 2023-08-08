@@ -16,15 +16,17 @@ public:
         for (int i = 0; i < tlen; ++i)
             buf_[i] = value;
     }
-    void resize(int width, int height) {
+    void resize(int width, int height, Value value) {
         if (width == width_ && height == height_) return;
         if (buf_) delete[] buf_;
         width_ = width;
         height_ = height;
         new_buf();
+        clear(value);
     }
     Value get(int x, int y) const { return buf_[index(x,y)]; }
     Value set(int x, int y, Value value) { buf_[index(x,y)] = value; return get(x,y); }
+
 private:
     void new_buf() { 
         buf_ = new Value[len()];
