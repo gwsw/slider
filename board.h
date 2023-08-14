@@ -18,6 +18,12 @@ public:
     void resize(int width, int height) {
         grid_.resize(width, height, '\0');
     }
+    int get_width() const {
+        return width_;
+    }
+    int get_height() const {
+        return height_;
+    }
     void clear() {
         grid_.clear('\0');
     }
@@ -314,7 +320,7 @@ private:
         else
             printf("|     ");
     }
-        
+
 private:
     int width_;
     int height_;

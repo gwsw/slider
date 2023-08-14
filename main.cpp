@@ -5,8 +5,12 @@
 #include <pthread.h>
 #include "solve.h"
 
-char Piece::next_name_ = 'A';
+char Piece::next_name_;
+
 bool verbose = false;
+bool print_all = false;
+bool show_moves = false;
+bool print_progress = false;
 bool dump_solns = false;
 bool draw_solns = false;
 
@@ -39,9 +43,15 @@ static bool move_piece(char* cmd, Board& board) {
     return board.move(pix, cmd[0] == 'f');
 }
 
+static void solve_progress(void* ctx, int pct) {
+    if (!print_progress) return;
+    printf(" %d%%\r", pct);
+    fflush(stdout);
+}
+
 static bool solve_moves(Board& board, int num_moves) {
     Solver solver(board);
-    bool solved = solver.solve_moves(num_moves);
+    bool solved = solver.solve(num_moves, &solve_progress, NULL);
     if (!solved) printf("no %d move solution\n", num_moves);
     return solved;
 }
@@ -77,12 +87,15 @@ int main(int argc, char** argv) {
     int height = 0;
     char* board_file = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "dDf:h:w:v")) != -1) {
+    while ((opt = getopt(argc, argv, "adDf:h:mpw:v")) != -1) {
         switch (opt) {
+        case 'a': print_all = true; break;
         case 'd': dump_solns = true; break;
         case 'D': draw_solns = true; break;
         case 'f': board_file = optarg; break;
         case 'h': height = strtol(optarg, NULL, 10); break;
+        case 'm': show_moves = true; break;
+        case 'p': print_progress = true; break;
         case 'w': width = strtol(optarg, NULL, 10); break;
         case 'v': verbose = true; break;
         default: return usage();
