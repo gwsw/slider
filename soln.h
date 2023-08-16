@@ -1,0 +1,39 @@
+#ifndef _SOLN_H_
+#define _SOLN_H_ 1
+
+#include <string>
+#include "board.h"
+#include "move.h"
+
+class Soln : public std::deque<Move> {
+public:
+    Soln(Board const& board) : board_(board) {}
+    Soln(Soln const& soln) : board_(soln.board_) { *this = soln; }
+    Soln(Board const& board, std::string const& move_str) : board_(board) {
+        for (int i = 0; i < (int) move_str.size(); ++i) {
+            char piece_name = move_str.at(i);
+            int pix = board.piece_pix(piece_name);
+            if (pix < 0) continue; // skip invalid chars
+            bool prime = (i+1 < (int) move_str.size() && move_str.at(i+1) == '\'');
+            if (prime) ++i;
+            Move move (board, pix, !prime);
+            push_back(move);
+        }
+    }
+    Soln& operator=(Soln const& soln) {
+        std::deque<Move>::operator=(soln);
+        return *this;
+    }
+    std::string toString() const {
+        std::string str;
+        for (auto it = begin(); it != end(); ++it) {
+            str.push_back(board_.piece_name(it->pix));
+            if (!it->fwd) str.push_back('\'');
+        }
+        return str;
+    }
+private:
+    Board const& board_;
+};
+
+#endif // _SOLN_H_

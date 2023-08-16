@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include "solve.h"
+#include "mgr.h"
 
 char Piece::next_name_;
 
@@ -13,6 +14,7 @@ bool show_moves = false;
 bool print_progress = false;
 bool dump_solns = false;
 bool draw_solns = false;
+int num_threads = 1;
 
 static int usage() {
     printf("usage: slider [-w#][-h#] ...\n");
@@ -38,9 +40,30 @@ static bool set_goal(char* cmd, Board& board) {
     return board.set_goal(pix, x, y);
 }
 
-static bool move_piece(char* cmd, Board& board) {
-    int pix = strtoul(cmd, &cmd, 0);
-    return board.move(pix, cmd[0] == 'f');
+static bool move_pieces(char* cmd, Board& board) {
+    while (*cmd != '\0') {
+        if (*cmd == ' ' || *cmd == '\n' || *cmd == '\r') {
+            ++cmd;
+            continue;
+        }
+        char* next;
+        int pix = strtoul(cmd, &next, 0);
+        if (cmd == next) {
+            pix = board.piece_pix(*cmd);
+            if (pix < 0) {
+                printf("invalid piece at \"%s\"\n", cmd);
+                return false;
+            }
+            ++cmd;
+        }
+        bool fwd = (*cmd != '\'');
+        if (!fwd) ++cmd;
+        if (!board.move(pix, fwd)) {
+            printf("invalid move before \"%s\"\n", cmd);
+            return false;
+        }
+    }
+    return true;
 }
 
 static void solve_progress(void* ctx, int pct) {
@@ -50,10 +73,15 @@ static void solve_progress(void* ctx, int pct) {
 }
 
 static bool solve_moves(Board& board, int num_moves) {
+#if 1
+    Mgr mgr (board, num_moves, &solve_progress, NULL, num_threads);
+    return mgr.run();
+#else
     Solver solver(board);
     bool solved = solver.solve(num_moves, &solve_progress, NULL);
     if (!solved) printf("no %d move solution\n", num_moves);
     return solved;
+#endif
 }
 
 static bool solve(char* cmd, Board& board) {
@@ -76,7 +104,7 @@ static bool cmd(char* cmd, Board& board) {
     case 'v': return add_piece(&cmd[1], Piece::VERT, board); 
     case 'h': return add_piece(&cmd[1], Piece::HORZ, board);
     case 'g': return set_goal(&cmd[1], board);
-    case 'm': return move_piece(&cmd[1], board);
+    case 'm': return move_pieces(&cmd[1], board);
     case 's': return solve(&cmd[1], board);
     default: printf("unknown cmd %s\n", cmd); return false;
     }
@@ -87,7 +115,7 @@ int main(int argc, char** argv) {
     int height = 0;
     char* board_file = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "adDf:h:mpw:v")) != -1) {
+    while ((opt = getopt(argc, argv, "adDf:h:mpt:w:v")) != -1) {
         switch (opt) {
         case 'a': print_all = true; break;
         case 'd': dump_solns = true; break;
@@ -96,6 +124,7 @@ int main(int argc, char** argv) {
         case 'h': height = strtol(optarg, NULL, 10); break;
         case 'm': show_moves = true; break;
         case 'p': print_progress = true; break;
+        case 't': num_threads = strtol(optarg, NULL, 10); break;
         case 'w': width = strtol(optarg, NULL, 10); break;
         case 'v': verbose = true; break;
         default: return usage();
@@ -120,5 +149,6 @@ int main(int argc, char** argv) {
     for (int arg = optind; arg < argc; ++arg) {
         if (!cmd(argv[arg], *board)) printf("cmd failed\n");
     }
+    delete board;
     return 0;
 }
