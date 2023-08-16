@@ -8,9 +8,9 @@
 #include "move.h"
 #include "soln.h"
 
-static bool print_any = false;
 extern bool verbose;
 extern bool print_all;
+extern bool print_asap;
 extern bool show_moves;
 extern bool dump_solns;
 extern bool draw_solns;
@@ -26,7 +26,7 @@ public:
         std::list<Soln> found;
         if (board_.is_won()) {
             found.push_back(soln);
-            if (print_any) return found;
+            if (print_asap) soln.print();
         }
         if (max_depth <= 0)
             return found;
@@ -42,7 +42,6 @@ public:
                 if (!sub_solns.empty()) {
                     for (auto it = sub_solns.begin(); it != sub_solns.end(); ++it)
                         found.push_back(*it);
-                    if (print_any) return found;
                 }
                 // Undo the trial move.
                 if (!board_.move(move.pix, !move.fwd)) assert(false);
@@ -61,12 +60,14 @@ private:
         if (move.pix == last.pix && move.fwd == !last.fwd) return true;
         return false;
     }
+#if 0
     bool is_winner(Soln const& soln) const {
         board_.reset();
         for (auto imv = soln.begin(); imv != soln.end(); ++imv)
             board_.move(imv->pix, imv->fwd);
         return board_.is_won();
     }
+#endif
 
 private:
     Board& board_;

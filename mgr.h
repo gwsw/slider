@@ -33,7 +33,6 @@ public:
             soln.push_back(move);
             Branch* branch = new Branch(soln);
             if (branch_levels == 1) {
-///printf("add branch[%d] %s (total %d)\n", branch_levels, soln.toString().c_str(), (int)branches_.size());
                 branches_.push_back(branch);
             }
             init_branches(board, soln, branch_levels-1);
@@ -48,7 +47,6 @@ public:
         Branch* branch = branches_.back();
         branches_.pop_back();
         soln = branch->soln_;
-///printf("job %s (from %s)\n", soln.toString().c_str(), branch->soln_.toString().c_str());
         max_depth = max_depth_;
         if (progress_) progress_(ctx_, 100*branches_.size() / total_branches_);
         return true;
@@ -64,7 +62,7 @@ public:
             workers_.pop_back();
         }
         if (best_.size() > 0) {
-            printf("Winner: %s\n", best_.toString().c_str());
+            printf("Winner: %s\n", best_.to_string().c_str());
             return true;
         }
         return false;

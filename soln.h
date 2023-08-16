@@ -24,7 +24,7 @@ public:
         std::deque<Move>::operator=(soln);
         return *this;
     }
-    std::string toString() const {
+    std::string to_string() const {
         std::string str;
         for (auto it = begin(); it != end(); ++it) {
             str.push_back(board_.piece_name(it->pix));
@@ -32,6 +32,22 @@ public:
         }
         return str;
     }
+    void print(bool dump = false, bool draw = false) const {
+        printf("%s\n", to_string().c_str());
+        if (dump || draw) {
+            Board board = board_;
+            board.reset();
+            for (auto imv = begin(); imv != end(); ++imv) {
+                if (draw) board.draw();
+                if (dump) board.dump();
+                printf("\n");
+                board.move(imv->pix, imv->fwd);
+            }
+            if (draw) board.draw();
+            if (dump) board.dump();
+        }
+    }
+
 private:
     Board const& board_;
 };

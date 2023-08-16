@@ -34,7 +34,6 @@ public:
 private:
     void run() {
         for (;;) {
-///std::cout << "worker[" << thread_.get_id() << "]: run loop\n";
             {
             std::unique_lock lock(thread_lock_);
             if (stop_) break;
@@ -42,7 +41,6 @@ private:
             Soln base_soln (board_);
             int max_depth;
             if (!mgr_.get_job(base_soln, max_depth)) break;
-///std::cout << "worker[" << thread_.get_id() << "]: job " << base_soln.toString() << " depth " << max_depth << "\n";
             Board board = board_;
             bool ok = true;
             for (auto it = base_soln.begin(); it != base_soln.end(); ++it)
