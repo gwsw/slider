@@ -5,16 +5,16 @@ class Piece {
     friend class Board;
 public:
     enum Orient { HORZ, VERT };
-    Piece(int x, int y, int len, Orient orient, char name = '\0') : ox(x), oy(y), x(x), y(y), len(len), orient(orient), name(name ? name : next_name_++) {}
-    void reset() { x = ox; y = oy; }
+    Piece(int x, int y, int len, Orient orient, char name = '\0') : ox_(x), oy_(y), x_(x), y_(y), len_(len), orient_(orient), name_(name ? name : next_name_++) {}
+    void reset() { x_ = ox_; y_ = oy_; }
 private:
-    int ox;
-    int oy;
-    int x;
-    int y;
-    int len;
-    Orient orient;
-    char name;
+    int ox_;
+    int oy_;
+    int x_;
+    int y_;
+    int len_;
+    Orient orient_;
+    char name_;
     static char next_name_;
 };
 

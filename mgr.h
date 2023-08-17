@@ -5,8 +5,6 @@
 #include <mutex>
 #include "worker.h"
 
-extern bool dump_solns;
-extern bool draw_solns;
 
 class Mgr : public Worker::WorkerMgr, public Solver::SolverMgr {
 public:
@@ -69,7 +67,7 @@ public:
         }
         if (best_.size() > 0) {
             printf("Winner: ");
-            best_.print(dump_solns, draw_solns);
+            best_.print();
             return true;
         }
         return false;

@@ -6,6 +6,8 @@
 #include "board.h"
 #include "move.h"
 
+extern bool dump_solns;
+extern bool draw_solns;
 extern bool show_moves;
 
 class Soln : public std::deque<Move> {
@@ -35,22 +37,21 @@ public:
         }
         return str;
     }
-    void print(bool dump = false, bool draw = false) const {
+    void print() const {
         printf("%s\n", to_string().c_str());
-        if (dump || draw) {
-            Board board = board_;
-            board.reset();
-            for (auto imv = begin(); imv != end(); ++imv) {
-                if (show_moves) {
-                    if (draw) board.draw();
-                    if (dump) board.dump();
-                    printf("\n");
-                }
-                board.move(imv->pix, imv->fwd);
+        if (!dump_solns && !draw_solns) return;
+        Board board = board_;
+        board.reset();
+        for (auto imv = begin(); imv != end(); ++imv) {
+            if (show_moves) {
+                if (draw_solns) board.draw();
+                if (dump_solns) board.dump();
+                printf("\n");
             }
-            if (draw) board.draw();
-            if (dump) board.dump();
+            board.move(imv->pix, imv->fwd);
         }
+        if (draw_solns) board.draw();
+        if (dump_solns) board.dump();
     }
 
 private:
