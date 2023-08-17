@@ -269,13 +269,13 @@ private:
         printf("*");
         for (int x = 0; x < width_; ++x) {
             if (y == 0) {
-                draw_horz_bar(grid_get(x,y) ? '-' : ' ', x, y);
+                draw_horz_bar(x, y, grid_get(x,y) ? '-' : ' ');
             } else if (y == height_) {
-                draw_horz_bar(grid_get(x,y-1) ? '-' : ' ', x, y);
+                draw_horz_bar(x, y, grid_get(x,y-1) ? '-' : ' ');
             } else if (grid_get(x,y) != grid_get(x,y-1)) {
-                draw_horz_bar('-', x, y);
+                draw_horz_bar(x, y, '-');
             } else {
-                draw_horz_bar(' ', x, y, grid_get(x,y));
+                draw_horz_bar(x, y, ' ', grid_get(x,y));
             }
         }
         printf(" *\n");
@@ -294,9 +294,9 @@ private:
             return '+';
         return ' ';
     }
-    void draw_horz_bar(char chm, int x, int y, char color_ch = ' ') const {
+    void draw_horz_bar(int x, int y, char chm, char color_ch = ' ') const {
         char chl = hchar(grid_get(x-1,y-1), grid_get(x,y-1), grid_get(x-1,y), grid_get(x,y));
-        printf("%c%s%c%c%c%c%c%s", chl, start_color(color_ch), chm, chm, chm, chm, chm, end_color(color_ch));
+        printf("%c%s%c%c%c%c%c%s", chl, start_color(color_ch), chm, chm, color_ch ? color_ch : ' ', chm, chm, end_color(color_ch));
     }
     char grid_get(int x, int y) const {
         if (x < 0 || x >= width_) return '\0';
