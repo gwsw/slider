@@ -19,7 +19,26 @@ bool print_color = false;
 int num_threads = 1;
 
 static int usage() {
-    printf("usage: slider [-w#][-h#] ...\n");
+    printf("usage: slider [-options] [commands...]\n");
+    printf("  Options:\n");
+    printf("       -a       Print all solutions\n");
+    printf("       -A       Print solutions ASAP\n");
+    printf("       -c       Draw boards with color\n");
+    printf("       -d       Dump boards (one char per cell)\n");
+    printf("       -D       Draw boards (line art)\n");
+    printf("       -f FILE  Board description in file\n");
+    printf("       -m       Show solution moves\n");
+    printf("       -p       Print progress\n");
+    printf("       -t NUM   Number of solution threads\n");
+    printf("       -v       Verbose\n");
+    printf("  Commands:\n");
+    printf("       h X,Y,L  Add L-length horizontal piece at (x,y)\n");
+    printf("       v X,Y,L  Add L-length vertical piece at (x,y)\n");
+    printf("       g P,X,Y  Set goal piece to P, goal cell at (x,y)\n");
+    printf("       m [P...] Move piece(s). Seq of pieces each optionally followed by ' to reverse\n");
+    printf("       s NUM    Solve board, max NUM moves\n");
+    printf("       k        Dump board\n");
+    printf("       D        Draw board\n");
     return 1;
 }
 
