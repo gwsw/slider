@@ -68,21 +68,13 @@ static bool move_pieces(char* cmd, Board& board) {
 }
 
 static void solve_progress(void* ctx, int pct) {
-    if (!print_progress) return;
-    printf(" %d%%\r", pct);
+    printf("  %d%%   \r", pct);
     fflush(stdout);
 }
 
 static bool solve_moves(Board& board, int num_moves) {
-#if 1
-    Mgr mgr (board, num_moves, &solve_progress, NULL, num_threads);
+    Mgr mgr (board, num_moves, print_progress ? &solve_progress : NULL, NULL, num_threads);
     return mgr.run();
-#else
-    Solver solver(board);
-    bool solved = solver.solve(num_moves, &solve_progress, NULL);
-    if (!solved) printf("no %d move solution\n", num_moves);
-    return solved;
-#endif
 }
 
 static bool solve(char* cmd, Board& board) {

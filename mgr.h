@@ -48,7 +48,7 @@ public:
         branches_.pop_back();
         soln = branch->soln_;
         max_depth = max_depth_;
-        if (progress_) progress_(ctx_, 100*branches_.size() / total_branches_);
+        if (progress_) progress_(ctx_, 100* (total_branches_ - branches_.size()) / total_branches_);
         return true;
     }
     virtual void announce_winner(Soln const& soln) override {
