@@ -71,18 +71,23 @@ public:
                     }
                     height = strtoul(p+1, NULL, 0);
                     break;
-                case 'g': {
+                case 'g':
                     if (len < 5) {
                         printf("ERROR: invalid #g line in board file\n");
                         delete board;
                         return NULL;
                     }
-                    key_name = line[2];
-                    char* s;
-                    xgoal = strtoul(&line[3], &s, 0);
-                    if (*s == ',')
-                        ygoal = strtoul(s+1, &s, 0);
-                    break; }
+                    for (p = &line[2]; *p == ' '; ++p)
+                        ;
+                    key_name = *p++;
+                    xgoal = strtoul(p, &p, 0);
+                    if (*p != ',') {
+                        printf("ERROR: invalid #g line in board file\n");
+                        delete board;
+                        return NULL;
+                    }
+                    ygoal = strtoul(p+1, NULL, 0);
+                    break;
                 default: break;
                 }
                 if (board == NULL && width > 0 && height > 0) {
