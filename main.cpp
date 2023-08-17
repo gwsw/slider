@@ -15,6 +15,7 @@ bool show_moves = false;
 bool print_progress = false;
 bool dump_solns = false;
 bool draw_solns = false;
+bool print_color = false;
 int num_threads = 1;
 
 static int usage() {
@@ -108,10 +109,11 @@ int main(int argc, char** argv) {
     int height = 0;
     char* board_file = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "aAdDf:h:mpt:w:v")) != -1) {
+    while ((opt = getopt(argc, argv, "aAcdDf:h:mpt:w:v")) != -1) {
         switch (opt) {
         case 'a': print_all = true; break;
         case 'A': print_asap = true; break;
+        case 'c': print_color = true; break;
         case 'd': dump_solns = true; break;
         case 'D': draw_solns = true; break;
         case 'f': board_file = optarg; break;

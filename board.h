@@ -7,6 +7,8 @@
 #include "piece.h"
 #include "2d.h"
 
+extern bool print_color;
+
 #define MAX_WIDTH 100
 #define MAX_HEIGHT 100
 
@@ -267,58 +269,99 @@ private:
         printf("*");
         for (int x = 0; x < width_; ++x) {
             if (y == 0) {
-                if (grid_.get(x,y))
-                    draw_horz_bar();
-                else
-                    draw_horz_clr();
+                draw_horz_bar(grid_get(x,y) ? '-' : ' ', x, y);
             } else if (y == height_) {
-                if (grid_.get(x,y-1))
-                    draw_horz_bar();
-                else
-                    draw_horz_clr();
-            } else if (grid_.get(x,y) != grid_.get(x,y-1)) {
-                draw_horz_bar();
+                draw_horz_bar(grid_get(x,y-1) ? '-' : ' ', x, y);
+            } else if (grid_get(x,y) != grid_get(x,y-1)) {
+                draw_horz_bar('-', x, y);
             } else {
-                draw_horz_clr();
+                draw_horz_bar(' ', x, y, grid_get(x,y));
             }
         }
         printf(" *\n");
     }
-    void draw_horz_bar() const { printf(" ---- "); }
-    void draw_horz_clr() const { printf("      "); }
-
+    char hchar(int x, int y) const {
+        return hchar(grid_.get(x,y), grid_.get(x+1,y), grid_.get(x,y+1), grid_.get(x+1,y+1));
+    }
+    char hchar(char ul, char ur, char ll, char lr) const {
+        if (!ul && !ur && !ll && !lr)
+            return ' ';
+        if (ul == ur && ll == lr)
+            return '-';
+        if (ul == ll && ur == lr)
+            return '|';
+        if (ul || ur || ll || lr)
+            return '+';
+        return ' ';
+    }
+    void draw_horz_bar(char chm, int x, int y, char color_ch = ' ') const {
+        char chl = hchar(grid_get(x-1,y-1), grid_get(x,y-1), grid_get(x-1,y), grid_get(x,y));
+        printf("%c%s%c%c%c%c%c%s", chl, start_color(color_ch), chm, chm, chm, chm, chm, end_color(color_ch));
+    }
+    char grid_get(int x, int y) const {
+        if (x < 0 || x >= width_) return '\0';
+        if (y < 0 || y >= height_) return '\0';
+        return grid_.get(x,y);
+    }
     void draw_vert(int y) const {
         for (int line = 0; line < 2; ++line) {
             printf("*");
             for (int x = 0; x <= width_; ++x) {
-                if (x == 0) {
-                    if (grid_.get(x,y))
-                        draw_vert_bar(last_moved_ && last_moved_ == grid_.get(x,y));
-                    else
-                        draw_vert_clr(false);
-                } else if (x == width_) {
+                if (x == width_) {
                     if (grid_.get(x-1,y))
                         printf("|*\n");
                     else
                         printf(" *\n");
-                } else if (grid_.get(x,y) != grid_.get(x-1,y))
-                    draw_vert_bar(last_moved_ && last_moved_ == grid_.get(x,y));
-                else
-                    draw_vert_clr(last_moved_ && last_moved_ == grid_.get(x,y));
+                } else {
+                    char gname = grid_.get(x,y);
+                    if (x == 0) {
+                        if (gname)
+                            draw_vert_bar(gname);
+                        else
+                            draw_vert_clr(' ');
+                    } else if (x == width_) {
+                        if (grid_.get(x-1,y))
+                            printf("|*\n");
+                        else
+                            printf(" *\n");
+                    } else if (gname != grid_.get(x-1,y)) {
+                        if (gname)
+                            draw_vert_bar(gname);
+                        else
+                            draw_vert_bar(' ');
+                    } else {
+                        if (gname)
+                            draw_vert_clr(gname);
+                        else
+                            draw_vert_clr(' ');
+                    }
+                }
             }
         }
     }
-    void draw_vert_clr(bool last_moved) const {
-        if (last_moved)
-            printf("::::::");
-        else
-            printf("      ");
+    void draw_vert_bar(char ch) const {
+        printf("|%s  %c  %s", start_color(ch), ch, end_color(ch));
     }
-    void draw_vert_bar(bool last_moved) const {
-        if (last_moved)
-            printf("|:::::");
-        else
-            printf("|     ");
+    void draw_vert_clr(char ch) const {
+        printf("%s   %c  %s", start_color(ch), ch, end_color(ch));
+    }
+    char const* start_color(char ch) const {
+        if (!print_color || ch == ' ' || ch == '\0') return "";
+        static char const* sgr[] = {
+            "\e[40;37m",
+            "\e[41;37m",
+            "\e[42;37m",
+            "\e[43;37m",
+            "\e[44;37m",
+            "\e[45;37m",
+            "\e[46;37m",
+            "\e[47;30m",
+        };
+        return sgr[ch % 8];
+    }
+    char const* end_color(int ch) const {
+        if (!print_color || ch == ' ' || ch == '\0') return "";
+        return "\e[m";
     }
 
 private:
