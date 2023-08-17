@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <list>
-#include <deque>
 #include "move.h"
 #include "soln.h"
 
@@ -49,9 +48,7 @@ public:
         }
         return found;
     }
-
-private:
-    bool stupid_move(Soln const& soln, Move const& move) {
+    static bool stupid_move(Soln const& soln, Move const& move) {
         if (soln.size() == 0) return false;
         Move const& last = soln.back();
         if (move.pix == last.pix && move.fwd == !last.fwd) return true;

@@ -24,47 +24,42 @@ public:
             workers_.pop_back();
             delete worker;
         }
-        while (!branches_.empty()) {
-            Branch* branch = branches_.back();
-            branches_.pop_back();
-            delete branch;
-        }
     }
     void init_branches(Board const& board, Soln& soln, int branch_levels) {
         if (branch_levels <= 0) return;
         for (Move move (board);;) {
-            soln.push_back(move);
-            Branch* branch = new Branch(soln);
-            if (branch_levels == 1) {
-                branches_.push_back(branch);
+            if (!Solver::stupid_move(soln, move)) {
+                soln.push_back(move);
+                if (branch_levels == 1) {
+                    branches_.push_back(soln);
+                }
+                init_branches(board, soln, branch_levels-1);
+                soln.pop_back();
             }
-            init_branches(board, soln, branch_levels-1);
-            soln.pop_back();
             if (!move.next()) break;
         }
         total_branches_ = (int) branches_.size();
     }
-    virtual bool get_job(Soln& soln, int& max_depth) override {
+    virtual bool get_job(Soln& soln, int& max_depth) override /* WorkerMgr */ {
         std::unique_lock lock(job_lock_);
         if (branches_.empty()) return false;
-        Branch* branch = branches_.back();
+        soln = branches_.back();
         branches_.pop_back();
-        soln = branch->soln_;
         max_depth = max_depth_;
         if (progress_) progress_(ctx_, 100* (total_branches_ - branches_.size()) / total_branches_);
         return true;
     }
-    virtual Solver::SolverMgr& smgr() {
+    virtual void announce_winner(Soln const& soln) override /* WorkerMgr */ {
+        if (best_.size() == 0 || soln.size() < best_.size())
+            best_ = soln;
+    }
+    virtual Solver::SolverMgr& smgr() override /* WorkerMgr */ {
         return *this;
     }
-    virtual int best_depth() const override {
+    virtual int best_depth() const override /* SolverMgr */ {
         int depth = (int) best_.size();
         if (depth == 0) return 9999999;
         return depth;
-    }
-    virtual void announce_winner(Soln const& soln) override {
-        if (best_.size() == 0 || soln.size() < best_.size())
-            best_ = soln;
     }
     bool run() {
         while (!workers_.empty()) {
@@ -81,13 +76,6 @@ public:
     }
 
 private:
-    class Branch {
-    public:
-        Branch(Soln const& soln) : soln_(soln) {}
-        Soln soln_;
-    };
-
-private:
     Board const& board_;
     int max_depth_;
     Soln best_;
@@ -95,7 +83,7 @@ private:
     void (*progress_)(void*,int);
     void* ctx_;
     int num_done_;
-    std::list<Branch*> branches_;
+    std::list<Soln> branches_;
     std::list<Worker*> workers_;
     std::mutex job_lock_;
 };

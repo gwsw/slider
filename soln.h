@@ -2,6 +2,7 @@
 #define _SOLN_H_ 1
 
 #include <string>
+#include <deque>
 #include "board.h"
 #include "move.h"
 

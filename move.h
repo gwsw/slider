@@ -2,7 +2,6 @@
 #define _MOVE_H_ 1
 
 #include "board.h"
-#include <deque>
 
 struct Move {
     Move(Board const& board, int pix = 0, bool fwd = true) : pix(pix), fwd(fwd), num_pieces(board.num_pieces()) {}
