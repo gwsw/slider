@@ -31,9 +31,7 @@ public:
         }
         if (max_depth <= 0)
             return found;
-        Move move(board_);
-        int pct_done = 0;
-        for (;;) {
+        for (Move move(board_);;) {
             if (!stupid_move(soln, move) && board_.move(move.pix, move.fwd)) {
                 // Make a trial move.
                 soln.push_back(move);
@@ -47,7 +45,6 @@ public:
                 if (!board_.move(move.pix, !move.fwd)) assert(false);
                 soln.pop_back();
             }
-            pct_done += 100 / (2 * board_.num_pieces());
             if (!move.next()) break;
         }
         return found;
@@ -55,18 +52,11 @@ public:
 
 private:
     bool stupid_move(Soln const& soln, Move const& move) {
+        if (soln.size() == 0) return false;
         Move const& last = soln.back();
         if (move.pix == last.pix && move.fwd == !last.fwd) return true;
         return false;
     }
-#if 0
-    bool is_winner(Soln const& soln) const {
-        board_.reset();
-        for (auto imv = soln.begin(); imv != soln.end(); ++imv)
-            board_.move(imv->pix, imv->fwd);
-        return board_.is_won();
-    }
-#endif
 
 private:
     Board& board_;

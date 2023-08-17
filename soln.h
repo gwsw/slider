@@ -5,6 +5,8 @@
 #include "board.h"
 #include "move.h"
 
+extern bool show_moves;
+
 class Soln : public std::deque<Move> {
 public:
     Soln(Board const& board) : board_(board) {}
@@ -38,9 +40,11 @@ public:
             Board board = board_;
             board.reset();
             for (auto imv = begin(); imv != end(); ++imv) {
-                if (draw) board.draw();
-                if (dump) board.dump();
-                printf("\n");
+                if (show_moves) {
+                    if (draw) board.draw();
+                    if (dump) board.dump();
+                    printf("\n");
+                }
                 board.move(imv->pix, imv->fwd);
             }
             if (draw) board.draw();

@@ -54,11 +54,7 @@ static bool add_piece(char* cmd, Piece::Orient orient, Board& board) {
 
 static bool set_goal(char* cmd, Board& board) {
     int pix = strtoul(cmd, &cmd, 0);
-    if (*cmd++ != ',') return false;
-    int x = strtoul(cmd, &cmd, 0);
-    if (*cmd++ != ',') return false;
-    int y = strtoul(cmd, &cmd, 0);
-    return board.set_goal(pix, x, y);
+    return board.set_goal(pix);
 }
 
 static bool move_pieces(char* cmd, Board& board) {

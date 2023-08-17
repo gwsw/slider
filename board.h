@@ -14,11 +14,7 @@ extern bool print_color;
 
 class Board {
 public:
-    Board(int width, int height) : width_(width), height_(height), grid_(width,height,'\0'), key_pix_(-1), xgoal_(-1), ygoal_(-1), last_moved_('\0') {
-        if (width >= 0 && height >= 0) resize(width, height);
-    }
-    void resize(int width, int height) {
-        grid_.resize(width, height, '\0');
+    Board(int width, int height) : width_(width), height_(height), grid_(width,height,'\0'), key_pix_(-1) {
     }
     int get_width() const {
         return width_;
@@ -29,10 +25,8 @@ public:
     void clear() {
         grid_.clear('\0');
     }
-    bool set_goal(int pix, int xgoal, int ygoal) {
+    bool set_goal(int pix) {
         key_pix_ = pix;
-        xgoal_ = xgoal;
-        ygoal_ = ygoal;
         return true;
     }
     void reset() {
@@ -41,15 +35,12 @@ public:
             ipiece->reset();
             (void) set_piece(*ipiece);
         }
-        last_moved_ = '\0';
     }
     static Board* read_file(FILE* fd) {
         std::map<char,bool> did_name;
         int width = 0;
         int height = 0;
         char key_name = '\0';
-        int xgoal = -1;
-        int ygoal = -1;
         Board* board = NULL;
         TwoDim<char> pic;
         for (int y = 0; height == 0 || y < height; ++y) {
@@ -80,13 +71,6 @@ public:
                     for (p = &line[2]; *p == ' '; ++p)
                         ;
                     key_name = *p++;
-                    xgoal = strtoul(p, &p, 0);
-                    if (*p != ',') {
-                        printf("ERROR: invalid #g line in board file\n");
-                        delete board;
-                        return NULL;
-                    }
-                    ygoal = strtoul(p+1, NULL, 0);
                     break;
                 default: break;
                 }
@@ -108,7 +92,7 @@ public:
                     did_name[ch] = true;
             }
         }
-        if (board == NULL || key_name == '\0' || xgoal < 0 || ygoal < 0) {
+        if (board == NULL || key_name == '\0') {
             printf("ERROR: incomplete board file\n");
             return NULL;
         }
@@ -124,7 +108,7 @@ public:
             delete board;
             return NULL;
         }
-        if (!board->set_goal(key_pix, xgoal, ygoal)) {
+        if (!board->set_goal(key_pix)) {
             printf("ERROR: invalid goal\n");
             delete board;
             return NULL;
@@ -186,7 +170,7 @@ public:
     }
     bool add_piece(Piece& piece) {
         if (!set_piece(piece)) return false;
-        pieces_.insert(pieces_.end(), piece);
+        pieces_.push_back(piece);
         return true;
     }
     bool move(int pix, bool fwd) {
@@ -221,7 +205,6 @@ public:
                 piece.y--;
             }
         }
-        last_moved_ = piece.name;
         return true;
     }
     bool is_won() const {
@@ -355,9 +338,6 @@ private:
     TwoDim<char> grid_;
     std::deque<Piece> pieces_;
     int key_pix_;
-    int xgoal_;
-    int ygoal_;
-    int last_moved_;
 };
 
 #endif // _BOARD_H_
