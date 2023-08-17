@@ -14,6 +14,7 @@ public:
         public:
         virtual bool get_job(Soln& soln, int& max_depth) = 0;
         virtual void announce_winner(Soln const& soln) = 0;
+        virtual Solver::SolverMgr& smgr() = 0;
     };
 
     Worker(Board const& board, WorkerMgr& mgr)
@@ -50,7 +51,7 @@ private:
             }
             if (ok) {
                 Solver solver (board);
-                std::list<Soln> solns = solver.find_solns(base_soln, max_depth);
+                std::list<Soln> solns = solver.find_solns(base_soln, max_depth, mgr_.smgr());
                 for (auto it = solns.begin(); it != solns.end(); ++it)
                     mgr_.announce_winner(*it);
             }

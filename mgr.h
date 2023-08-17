@@ -5,7 +5,7 @@
 #include <mutex>
 #include "worker.h"
 
-class Mgr : public Worker::WorkerMgr {
+class Mgr : public Worker::WorkerMgr, public Solver::SolverMgr {
 public:
     Mgr(Board const& board, int max_depth, void (*progress)(void*,int) = NULL, void* ctx = NULL, int num_threads = 1, int branch_levels = 3) :
             board_(board), max_depth_(max_depth-branch_levels), best_(board), progress_(progress), ctx_(ctx), num_done_(0) {
@@ -50,6 +50,14 @@ public:
         max_depth = max_depth_;
         if (progress_) progress_(ctx_, 100* (total_branches_ - branches_.size()) / total_branches_);
         return true;
+    }
+    virtual Solver::SolverMgr& smgr() {
+        return *this;
+    }
+    virtual int best_depth() const override {
+        int depth = (int) best_.size();
+        if (depth == 0) return 9999999;
+        return depth;
     }
     virtual void announce_winner(Soln const& soln) override {
         if (best_.size() == 0 || soln.size() < best_.size())
