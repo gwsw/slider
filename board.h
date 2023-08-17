@@ -58,9 +58,19 @@ public:
             if (fgets(line, sizeof(line), fd) != NULL)
                 len = strcspn(line, "\r\n");
             if (len > 2 && line[0] == '#') {
+                char* p;
                 switch (line[1]) {
                 case 'w': width = strtoul(&line[2], NULL, 0); break;
                 case 'h': height = strtoul(&line[2], NULL, 0); break;
+                case 'b':
+                    width = strtoul(&line[2], &p, 0);
+                    if (*p != ',' && *p != 'x') {
+                        printf("ERROR: invalid #b line in board file\n");
+                        delete board;
+                        return NULL;
+                    }
+                    height = strtoul(p+1, NULL, 0);
+                    break;
                 case 'g': {
                     if (len < 5) {
                         printf("ERROR: invalid #g line in board file\n");
